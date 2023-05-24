@@ -18,7 +18,7 @@ float attitude[3];
 
 float offset_x, offset_y, offset_z;
 float sum_x, sum_y, sum_z;
-int raw_x, raw_y, raw_z;
+float raw_x, raw_y, raw_z;
 
 void setup(void) {
   Serial.begin(115200);
@@ -107,6 +107,8 @@ void setup(void) {
         sum_x += raw_x;
         sum_y += raw_y;
         sum_z += raw_z;
+
+        Serial.println(sum_x);
         
         //Delay for a short time to allow MPU6050 to stabilize
         delay(10);
@@ -117,10 +119,11 @@ void setup(void) {
   float average_y = sum_y / 100.0;
   float average_z = sum_z / 100.0;
 
+  Serial.println(average_x);
   //Calculate offset value for each axis
-  offset_x = (float)raw_x - average_x;
-  offset_y = (float)raw_y - average_y;
-  offset_z = (float)raw_z - average_z;
+  offset_x = average_x;
+  offset_y = average_y;
+  offset_z = average_z;
 
 
 }
