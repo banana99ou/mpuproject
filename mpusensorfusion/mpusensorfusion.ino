@@ -16,6 +16,10 @@ float angular_velocity[3];
 float location[3];
 float attitude[3];
 
+float offset_x, offset_y, offset_z;
+float sum_x, sum_y, sum_z;
+int raw_x, raw_y, raw_z;
+
 void setup(void) {
   Serial.begin(115200);
   if (!mpu.begin()) {
@@ -86,17 +90,50 @@ void setup(void) {
 
   Serial.println("");
   delay(100);
+
+  //Use a loop to take 100 readings and sum the values for each axis
+  for (int i = 0; i < 100; i++) 
+    {
+        //Read raw data from MPU6050 (use your MPU6050 library)
+        sensors_event_t a, g, temp;
+        mpu.getEvent(&a, &g, &temp);
+        raw_x = a.acceleration.x;
+        raw_y = a.acceleration.y;
+        raw_z = a.acceleration.z;
+
+        Serial.println(raw_x);
+        
+        //Sum the values for each axis
+        sum_x += raw_x;
+        sum_y += raw_y;
+        sum_z += raw_z;
+        
+        //Delay for a short time to allow MPU6050 to stabilize
+        delay(10);
+    }
+
+  //Calculate average for each axis
+  float average_x = sum_x / 100.0;
+  float average_y = sum_y / 100.0;
+  float average_z = sum_z / 100.0;
+
+  //Calculate offset value for each axis
+  offset_x = (float)raw_x - average_x;
+  offset_y = (float)raw_y - average_y;
+  offset_z = (float)raw_z - average_z;
+
+
 }
 
 void loop() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   now = millis();
-  dt = now - before;
+  dt = (now - before) * 1000;
   before = now;
-  acceleration[0] = a.acceleration.x;
-  acceleration[1] = a.acceleration.y;
-  acceleration[2] = a.acceleration.z;
+  acceleration[0] = a.acceleration.x - offset_x;
+  acceleration[1] = a.acceleration.y - offset_y;
+  acceleration[2] = a.acceleration.z - offset_z;
 
   velocity[0] += acceleration[0] * dt;
   velocity[1] += acceleration[1] * dt;
@@ -106,5 +143,9 @@ void loop() {
   location[1] += velocity[1] * dt;
   location[2] += velocity[2] * dt;
 
-  Serial.println(location);
+  Serial.print(location[0]);
+  Serial.print(", ");
+  Serial.print(a.acceleration.x);
+  Serial.print(", ");
+  Serial.println(offset_x);
 }
