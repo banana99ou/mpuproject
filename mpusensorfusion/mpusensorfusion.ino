@@ -5,7 +5,8 @@
 Adafruit_MPU6050 mpu;
 
 unsigned long now, before;
-float dt;
+unsigned long dt;
+float dt_seconds;
 
 float acceleration[3];
 float angular_acceleration[3];
@@ -101,14 +102,14 @@ void setup(void) {
         raw_y = a.acceleration.y;
         raw_z = a.acceleration.z;
 
-        Serial.println(raw_x);
+        //Serial.println(raw_x);
         
         //Sum the values for each axis
         sum_x += raw_x;
         sum_y += raw_y;
         sum_z += raw_z;
 
-        Serial.println(sum_x);
+        //Serial.println(sum_x);
         
         //Delay for a short time to allow MPU6050 to stabilize
         delay(10);
@@ -119,7 +120,7 @@ void setup(void) {
   float average_y = sum_y / 100.0;
   float average_z = sum_z / 100.0;
 
-  Serial.println(average_x);
+  //Serial.println(average_x);
   //Calculate offset value for each axis
   offset_x = average_x;
   offset_y = average_y;
@@ -132,23 +133,28 @@ void loop() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   now = millis();
-  dt = (now - before) * 1000;
+  dt = (now - before);
+  dt_seconds = (float) dt / 1000.0;
   before = now;
   acceleration[0] = a.acceleration.x - offset_x;
   acceleration[1] = a.acceleration.y - offset_y;
   acceleration[2] = a.acceleration.z - offset_z;
 
-  velocity[0] += acceleration[0] * dt;
-  velocity[1] += acceleration[1] * dt;
-  velocity[2] += acceleration[2] * dt;
+  velocity[0] += acceleration[0] * dt_seconds;
+  velocity[1] += acceleration[1] * dt_seconds;
+  velocity[2] += acceleration[2] * dt_seconds;
 
-  location[0] += velocity[0] * dt;
-  location[1] += velocity[1] * dt;
-  location[2] += velocity[2] * dt;
+  location[0] += velocity[0] * dt_seconds;
+  location[1] += velocity[1] * dt_seconds;
+  location[2] += velocity[2] * dt_seconds;
 
-  Serial.print(location[0]);
+  Serial.print(acceleration[0]);
   Serial.print(", ");
-  Serial.print(a.acceleration.x);
+  Serial.print(dt_seconds);
   Serial.print(", ");
-  Serial.println(offset_x);
+  Serial.print(acceleration[0]);
+  Serial.print(", ");
+  Serial.print(velocity[0]);
+  Serial.print(", ");
+  Serial.println(location[0]);
 }
