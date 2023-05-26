@@ -17,9 +17,13 @@ float angular_velocity[3];
 float location[3];
 float attitude[3];
 
-float offset_x, offset_y, offset_z;
-float sum_x, sum_y, sum_z;
-float raw_x, raw_y, raw_z;
+float raw_accel_x, raw_accel_y, raw_accel_z;
+float raw_gyro_x, raw_gyro_y, raw_gyro_z;
+float sum_accel_x, sum_accel_y, sum_accel_z;
+float sum_gyro_x, sum_gyro_y, sum_gyro_z;
+
+float offset_accel_x, offset_accel_y, offset_accel_z;
+float offset_gyro_x, offset_gyro_y, offset_gyro_z;
 
 void setup(void) {
   Serial.begin(115200);
@@ -93,40 +97,94 @@ void setup(void) {
   delay(100);
 
   //Use a loop to take 100 readings and sum the values for each axis
-  for (int i = 0; i < 100; i++) 
-    {
-        //Read raw data from MPU6050 (use your MPU6050 library)
-        sensors_event_t a, g, temp;
-        mpu.getEvent(&a, &g, &temp);
-        raw_x = a.acceleration.x;
-        raw_y = a.acceleration.y;
-        raw_z = a.acceleration.z;
+  for (int i = 0; i < 100; i++) {
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+    raw_accel_x = a.acceleration.x;
+    raw_accel_y = a.acceleration.y;
+    raw_accel_z = a.acceleration.z;
+    raw_gyro_x = g.gyro.x;
+    raw_gyro_y = g.gyro.y;
+    raw_gyro_z = g.gyro.z;
 
-        //Serial.println(raw_x);
-        
-        //Sum the values for each axis
-        sum_x += raw_x;
-        sum_y += raw_y;
-        sum_z += raw_z;
+    sum_accel_x += raw_accel_x;
+    sum_accel_y += raw_accel_y;
+    sum_accel_z += raw_accel_z;
+    sum_gyro_x += raw_gyro_x;
+    sum_gyro_y += raw_gyro_y;
+    sum_gyro_z += raw_gyro_z;
 
-        //Serial.println(sum_x);
-        
-        //Delay for a short time to allow MPU6050 to stabilize
-        delay(10);
+    delay(10);
+  }
+
+  offset_accel_x = -(sum_accel_x / 100.0);
+  offset_accel_y = -(sum_accel_y / 100.0);
+  offset_accel_z = -(sum_accel_z / 100.0);
+  offset_gyro_x = -(sum_gyro_x / 100.0);
+  offset_gyro_y = -(sum_gyro_y / 100.0);
+  offset_gyro_z = -(sum_gyro_z / 100.0);
+}
+
+// Function to rotate the acceleration vector
+void adjust_acceleration_offset(float& offset_accel_x, float& offset_accel_y, float& offset_accel_z, float attitude[3]) {
+  // Extract the rotation angles from the attitude array
+  float a = attitude[0]; // Rotation around x-axis
+  float b = attitude[1]; // Rotation around y-axis
+  float c = attitude[2]; // Rotation around z-axis
+
+  // Rotation matrix around the x-axis
+  float x_rot[3][3] = {
+    {1, 0, 0},
+    {0, cos(a), -sin(a)},
+    {0, sin(a), cos(a)}
+  };
+
+  // Rotation matrix around the y-axis
+  float y_rot[3][3] = {
+    {cos(b), 0, sin(b)},
+    {0, 1, 0},
+    {-sin(b), 0, cos(b)}
+  };
+
+  // Rotation matrix around the z-axis
+  float z_rot[3][3] = {
+    {cos(c), -sin(c), 0},
+    {sin(c), cos(c), 0},
+    {0, 0, 1}
+  };
+
+  // Perform the rotations
+  float result[3] = {offset_accel_x, offset_accel_y, offset_accel_z};
+
+  // Rotate around the z-axis
+  float temp[3];
+  for (int i = 0; i < 3; i++) {
+    temp[i] = 0;
+    for (int j = 0; j < 3; j++) {
+      temp[i] += z_rot[i][j] * result[j];
     }
+  }
 
-  //Calculate average for each axis
-  float average_x = sum_x / 100.0;
-  float average_y = sum_y / 100.0;
-  float average_z = sum_z / 100.0;
+  // Rotate around the y-axis
+  for (int i = 0; i < 3; i++) {
+    result[i] = 0;
+    for (int j = 0; j < 3; j++) {
+      result[i] += y_rot[i][j] * temp[j];
+    }
+  }
 
-  //Serial.println(average_x);
-  //Calculate offset value for each axis
-  offset_x = average_x;
-  offset_y = average_y;
-  offset_z = average_z;
+  // Rotate around the x-axis
+  for (int i = 0; i < 3; i++) {
+    temp[i] = 0;
+    for (int j = 0; j < 3; j++) {
+      temp[i] += x_rot[i][j] * result[j];
+    }
+  }
 
-
+  // Update the output variables
+  offset_accel_x = temp[0];
+  offset_accel_y = temp[1];
+  offset_accel_z = temp[2];
 }
 
 void loop() {
@@ -136,9 +194,25 @@ void loop() {
   dt = (now - before);
   dt_seconds = (float) dt / 1000.0;
   before = now;
-  acceleration[0] = a.acceleration.x - offset_x;
-  acceleration[1] = a.acceleration.y - offset_y;
-  acceleration[2] = a.acceleration.z - offset_z;
+
+  angular_acceleration[0] = g.gyro.x - offset_gyro_x;
+  angular_acceleration[1] = g.gyro.y - offset_gyro_y;
+  angular_acceleration[2] = g.gyro.z - offset_gyro_z;
+
+  angular_velocity[0] += angular_acceleration[0] * dt_seconds;
+  angular_velocity[1] += angular_acceleration[1] * dt_seconds;
+  angular_velocity[2] += angular_acceleration[2] * dt_seconds;
+
+  attitude[0] += angular_velocity[0] + dt_seconds;
+  attitude[1] += angular_velocity[1] + dt_seconds;
+  attitude[2] += angular_velocity[2] + dt_seconds;
+
+  //adjust acceleration offset
+  adjust_acceleration_offset(offset_accel_x, offset_accel_y, offset_accel_z, attitude);
+
+  acceleration[0] = a.acceleration.x - offset_accel_x;
+  acceleration[1] = a.acceleration.y - offset_accel_y;
+  acceleration[2] = a.acceleration.z - offset_accel_z;
 
   velocity[0] += acceleration[0] * dt_seconds;
   velocity[1] += acceleration[1] * dt_seconds;
@@ -148,10 +222,10 @@ void loop() {
   location[1] += velocity[1] * dt_seconds;
   location[2] += velocity[2] * dt_seconds;
 
-  Serial.print(acceleration[0]);
-  Serial.print(", ");
-  Serial.print(dt_seconds);
-  Serial.print(", ");
+  //Serial.print(acceleration[0]);
+  //Serial.print(", ");
+  //Serial.print(dt_seconds);
+  //Serial.print(", ");
   Serial.print(acceleration[0]);
   Serial.print(", ");
   Serial.print(velocity[0]);
