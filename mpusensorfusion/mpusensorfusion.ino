@@ -195,9 +195,9 @@ void loop() {
   dt_seconds = (float) dt / 1000.0;
   before = now;
 
-  angular_acceleration[0] = g.gyro.x - offset_gyro_x;
-  angular_acceleration[1] = g.gyro.y - offset_gyro_y;
-  angular_acceleration[2] = g.gyro.z - offset_gyro_z;
+  angular_acceleration[0] = g.gyro.x + offset_gyro_x;
+  angular_acceleration[1] = g.gyro.y + offset_gyro_y;
+  angular_acceleration[2] = g.gyro.z + offset_gyro_z;
 
   angular_velocity[0] += angular_acceleration[0] * dt_seconds;
   angular_velocity[1] += angular_acceleration[1] * dt_seconds;
@@ -208,11 +208,11 @@ void loop() {
   attitude[2] += angular_velocity[2] * dt_seconds;
 
   //adjust acceleration offset
-  adjust_acceleration_offset(offset_accel_x, offset_accel_y, offset_accel_z, attitude);
+  //adjust_acceleration_offset(offset_accel_x, offset_accel_y, offset_accel_z, attitude);
 
-  acceleration[0] = a.acceleration.x - offset_accel_x;
-  acceleration[1] = a.acceleration.y - offset_accel_y;
-  acceleration[2] = a.acceleration.z - offset_accel_z;
+  acceleration[0] = a.acceleration.x + offset_accel_x;
+  acceleration[1] = a.acceleration.y + offset_accel_y;
+  acceleration[2] = a.acceleration.z + offset_accel_z;
 
   velocity[0] += acceleration[0] * dt_seconds;
   velocity[1] += acceleration[1] * dt_seconds;
@@ -222,13 +222,63 @@ void loop() {
   location[1] += velocity[1] * dt_seconds;
   location[2] += velocity[2] * dt_seconds;
 
-  //Serial.print(acceleration[0]);
-  //Serial.print(", ");
-  //Serial.print(dt_seconds);
-  //Serial.print(", ");
-  Serial.print(attitude[0]);
+  Serial.print(a.acceleration.x);
+  Serial.print(", ");
+  Serial.print(a.acceleration.y);
+  Serial.print(", ");
+  Serial.print(a.acceleration.z);
+  Serial.print(", ");
+  Serial.print(offset_accel_x);
+  Serial.print(", ");
+  Serial.print(offset_accel_y);
+  Serial.print(", ");
+  Serial.print(offset_accel_z);
+  Serial.print(", ");
+  Serial.print(acceleration[0]);
+  Serial.print(", ");
+  Serial.print(acceleration[1]);
+  Serial.print(", ");
+  Serial.print(acceleration[2]);
+  Serial.print(", ");
+  Serial.print(velocity[0]);
+  Serial.print(", ");
+  Serial.print(velocity[1]);
+  Serial.print(", ");
+  Serial.print(velocity[2]);
+  Serial.print(", ");
+  Serial.print(location[0]);
+  Serial.print(", ");
+  Serial.print(location[1]);
+  Serial.print(", ");
+  Serial.print(location[2]);
+  Serial.print(", ");
+  Serial.print(g.gyro.x);
+  Serial.print(", ");
+  Serial.print(g.gyro.y);
+  Serial.print(", ");
+  Serial.print(g.gyro.z);
+  Serial.print(", ");
+  Serial.print(offset_gyro_x);
+  Serial.print(", ");
+  Serial.print(offset_gyro_y);
+  Serial.print(", ");
+  Serial.print(offset_gyro_z);
+  Serial.print(", ");
+  Seiral.print(angular_acceleration[0]);
+  Serial.print(", ");
+  Seiral.print(angular_acceleration[1]);
+  Serial.print(", ");
+  Seiral.print(angular_acceleration[2]);
+  Serial.print(", ");
+  Serial.print(angular_velocity[0]);
+  Serial.print(", ");
+  Serial.print(angular_velocity[1]);
+  Serial.print(", ");
+  Serial.print(angular_velocity[2]);
   Serial.print(", ");
   Serial.print(attitude[0]);
+  Serial.print(", ");
+  Serial.print(attitude[1]);
   Serial.print(", ");
   Serial.println(attitude[2]);
 }
