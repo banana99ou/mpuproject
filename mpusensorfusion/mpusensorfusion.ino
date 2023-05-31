@@ -1,8 +1,15 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
+#include <Servo.h>
+
+#define ServoPin 10
+
+Servo servo;
 
 Adafruit_MPU6050 mpu;
+
+int Servoangle = 0;
 
 unsigned long now, before;
 unsigned long dt;
@@ -26,6 +33,7 @@ float offset_accel_x, offset_accel_y, offset_accel_z;
 float offset_gyro_x, offset_gyro_y, offset_gyro_z;
 
 void setup(void) {
+  servo.attach(ServoPin);
   Serial.begin(115200);
   if (!mpu.begin()) {
     Serial.println("Failed to find MPU6050");
@@ -188,6 +196,16 @@ void adjust_acceleration_offset(float& offset_accel_x, float& offset_accel_y, fl
 }
 
 void loop() {
+
+  servo.write(Servoangle);
+  delay(10);
+  if (Servoangle > 10);
+  {
+    Servoangle = 0;
+  }
+  
+  Servoangle += 1;
+
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   now = millis();
@@ -222,60 +240,60 @@ void loop() {
   location[1] += velocity[1] * dt_seconds;
   location[2] += velocity[2] * dt_seconds;
 
-  Serial.print(a.acceleration.x);
-  Serial.print(", ");
-  Serial.print(a.acceleration.y);
-  Serial.print(", ");
-  Serial.print(a.acceleration.z);
-  Serial.print(", ");
-  Serial.print(offset_accel_x);
-  Serial.print(", ");
-  Serial.print(offset_accel_y);
-  Serial.print(", ");
-  Serial.print(offset_accel_z);
-  Serial.print(", ");
-  Serial.print(acceleration[0]);
-  Serial.print(", ");
-  Serial.print(acceleration[1]);
-  Serial.print(", ");
-  Serial.print(acceleration[2]);
-  Serial.print(", ");
-  Serial.print(velocity[0]);
-  Serial.print(", ");
-  Serial.print(velocity[1]);
-  Serial.print(", ");
-  Serial.print(velocity[2]);
-  Serial.print(", ");
-  Serial.print(location[0]);
-  Serial.print(", ");
-  Serial.print(location[1]);
-  Serial.print(", ");
-  Serial.print(location[2]);
-  Serial.print(", ");
-  Serial.print(g.gyro.x);
-  Serial.print(", ");
-  Serial.print(g.gyro.y);
-  Serial.print(", ");
-  Serial.print(g.gyro.z);
-  Serial.print(", ");
-  Serial.print(offset_gyro_x);
-  Serial.print(", ");
-  Serial.print(offset_gyro_y);
-  Serial.print(", ");
-  Serial.print(offset_gyro_z);
-  Serial.print(", ");
-  Seiral.print(angular_acceleration[0]);
-  Serial.print(", ");
-  Seiral.print(angular_acceleration[1]);
-  Serial.print(", ");
-  Seiral.print(angular_acceleration[2]);
-  Serial.print(", ");
-  Serial.print(angular_velocity[0]);
-  Serial.print(", ");
-  Serial.print(angular_velocity[1]);
-  Serial.print(", ");
-  Serial.print(angular_velocity[2]);
-  Serial.print(", ");
+  // Serial.print(a.acceleration.x);
+  // Serial.print(", ");
+  // Serial.print(a.acceleration.y);
+  // Serial.print(", ");
+  // Serial.print(a.acceleration.z);
+  // Serial.print(", ");
+  // Serial.print(offset_accel_x);
+  // Serial.print(", ");
+  // Serial.print(offset_accel_y);
+  // Serial.print(", ");
+  // Serial.print(offset_accel_z);
+  // Serial.print(", ");
+  // Serial.print(acceleration[0]);
+  // Serial.print(", ");
+  // Serial.print(acceleration[1]);
+  // Serial.print(", ");
+  // Serial.print(acceleration[2]);
+  // Serial.print(", ");
+  // Serial.print(velocity[0]);
+  // Serial.print(", ");
+  // Serial.print(velocity[1]);
+  // Serial.print(", ");
+  // Serial.print(velocity[2]);
+  // Serial.print(", ");
+  // Serial.print(location[0]);
+  // Serial.print(", ");
+  // Serial.print(location[1]);
+  // Serial.print(", ");
+  // Serial.print(location[2]);
+  // Serial.print(", ");
+  // Serial.print(g.gyro.x);
+  // Serial.print(", ");
+  // Serial.print(g.gyro.y);
+  // Serial.print(", ");
+  // Serial.print(g.gyro.z);
+  // Serial.print(", ");
+  // Serial.print(offset_gyro_x);
+  // Serial.print(", ");
+  // Serial.print(offset_gyro_y);
+  // Serial.print(", ");
+  // Serial.print(offset_gyro_z);
+  // Serial.print(", ");
+  // Seiral.print(angular_acceleration[0]);
+  // Serial.print(", ");
+  // Seiral.print(angular_acceleration[1]);
+  // Serial.print(", ");
+  // Seiral.print(angular_acceleration[2]);
+  // Serial.print(", ");
+  // Serial.print(angular_velocity[0]);
+  // Serial.print(", ");
+  //Serial.print(angular_velocity[1]);
+  //Serial.print(", ");
+  //Serial.print(angular_velocity[2]);
+  //Serial.print(", ");
   Serial.print(attitude[0]);
   Serial.print(", ");
   Serial.print(attitude[1]);
