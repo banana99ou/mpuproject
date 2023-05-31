@@ -203,9 +203,9 @@ void loop() {
   angular_velocity[1] += angular_acceleration[1] * dt_seconds;
   angular_velocity[2] += angular_acceleration[2] * dt_seconds;
 
-  attitude[0] += angular_velocity[0] + dt_seconds;
-  attitude[1] += angular_velocity[1] + dt_seconds;
-  attitude[2] += angular_velocity[2] + dt_seconds;
+  attitude[0] += angular_velocity[0] * dt_seconds;
+  attitude[1] += angular_velocity[1] * dt_seconds;
+  attitude[2] += angular_velocity[2] * dt_seconds;
 
   //adjust acceleration offset
   adjust_acceleration_offset(offset_accel_x, offset_accel_y, offset_accel_z, attitude);
@@ -226,9 +226,9 @@ void loop() {
   //Serial.print(", ");
   //Serial.print(dt_seconds);
   //Serial.print(", ");
-  Serial.print(acceleration[0]);
+  Serial.print(attitude[0]);
   Serial.print(", ");
-  Serial.print(velocity[0]);
+  Serial.print(attitude[0]);
   Serial.print(", ");
-  Serial.println(location[0]);
+  Serial.println(attitude[2]);
 }
