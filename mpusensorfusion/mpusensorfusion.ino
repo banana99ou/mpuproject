@@ -1,15 +1,6 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
-#include <Servo.h>
-
-#define ServoPin 10
-
-Servo servo;
-
-Adafruit_MPU6050 mpu;
-
-int Servoangle = 0;
 
 unsigned long now, before;
 unsigned long dt;
@@ -31,6 +22,69 @@ float sum_gyro_x, sum_gyro_y, sum_gyro_z;
 
 float offset_accel_x, offset_accel_y, offset_accel_z;
 float offset_gyro_x, offset_gyro_y, offset_gyro_z;
+
+
+// Function to rotate the acceleration vector
+void adjust_acceleration_offset(float& offset_accel_x, float& offset_accel_y, float& offset_accel_z, float attitude[3]) {
+  // Extract the rotation angles from the attitude array
+  float a = attitude[0]; // Rotation around x-axis
+  float b = attitude[1]; // Rotation around y-axis
+  float c = attitude[2]; // Rotation around z-axis
+
+  // Rotation matrix around the x-axis
+  float x_rot[3][3] = {
+    {1, 0, 0},
+    {0, cos(a), -sin(a)},
+    {0, sin(a), cos(a)}
+  };
+
+  // Rotation matrix around the y-axis
+  float y_rot[3][3] = {
+    {cos(b), 0, sin(b)},
+    {0, 1, 0},
+    {-sin(b), 0, cos(b)}
+  };
+
+  // Rotation matrix around the z-axis
+  float z_rot[3][3] = {
+    {cos(c), -sin(c), 0},
+    {sin(c), cos(c), 0},
+    {0, 0, 1}
+  };
+
+  // Perform the rotations
+  float result[3] = {offset_accel_x, offset_accel_y, offset_accel_z};
+
+  // Rotate around the z-axis
+  float temp[3];
+  for (int i = 0; i < 3; i++) {
+    temp[i] = 0;
+    for (int j = 0; j < 3; j++) {
+      temp[i] += z_rot[i][j] * result[j];
+    }
+  }
+
+  // Rotate around the y-axis
+  for (int i = 0; i < 3; i++) {
+    result[i] = 0;
+    for (int j = 0; j < 3; j++) {
+      result[i] += y_rot[i][j] * temp[j];
+    }
+  }
+
+  // Rotate around the x-axis
+  for (int i = 0; i < 3; i++) {
+    temp[i] = 0;
+    for (int j = 0; j < 3; j++) {
+      temp[i] += x_rot[i][j] * result[j];
+    }
+  }
+
+  // Update the output variables
+  offset_accel_x = temp[0];
+  offset_accel_y = temp[1];
+  offset_accel_z = temp[2];
+}
 
 void setup(void) {
   servo.attach(ServoPin);
@@ -133,79 +187,7 @@ void setup(void) {
   offset_gyro_z = -(sum_gyro_z / 100.0);
 }
 
-// Function to rotate the acceleration vector
-void adjust_acceleration_offset(float& offset_accel_x, float& offset_accel_y, float& offset_accel_z, float attitude[3]) {
-  // Extract the rotation angles from the attitude array
-  float a = attitude[0]; // Rotation around x-axis
-  float b = attitude[1]; // Rotation around y-axis
-  float c = attitude[2]; // Rotation around z-axis
-
-  // Rotation matrix around the x-axis
-  float x_rot[3][3] = {
-    {1, 0, 0},
-    {0, cos(a), -sin(a)},
-    {0, sin(a), cos(a)}
-  };
-
-  // Rotation matrix around the y-axis
-  float y_rot[3][3] = {
-    {cos(b), 0, sin(b)},
-    {0, 1, 0},
-    {-sin(b), 0, cos(b)}
-  };
-
-  // Rotation matrix around the z-axis
-  float z_rot[3][3] = {
-    {cos(c), -sin(c), 0},
-    {sin(c), cos(c), 0},
-    {0, 0, 1}
-  };
-
-  // Perform the rotations
-  float result[3] = {offset_accel_x, offset_accel_y, offset_accel_z};
-
-  // Rotate around the z-axis
-  float temp[3];
-  for (int i = 0; i < 3; i++) {
-    temp[i] = 0;
-    for (int j = 0; j < 3; j++) {
-      temp[i] += z_rot[i][j] * result[j];
-    }
-  }
-
-  // Rotate around the y-axis
-  for (int i = 0; i < 3; i++) {
-    result[i] = 0;
-    for (int j = 0; j < 3; j++) {
-      result[i] += y_rot[i][j] * temp[j];
-    }
-  }
-
-  // Rotate around the x-axis
-  for (int i = 0; i < 3; i++) {
-    temp[i] = 0;
-    for (int j = 0; j < 3; j++) {
-      temp[i] += x_rot[i][j] * result[j];
-    }
-  }
-
-  // Update the output variables
-  offset_accel_x = temp[0];
-  offset_accel_y = temp[1];
-  offset_accel_z = temp[2];
-}
-
 void loop() {
-
-  servo.write(Servoangle);
-  delay(10);
-  if (Servoangle > 10);
-  {
-    Servoangle = 0;
-  }
-  
-  Servoangle += 1;
-
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   now = millis();
@@ -290,10 +272,10 @@ void loop() {
   // Serial.print(", ");
   // Serial.print(angular_velocity[0]);
   // Serial.print(", ");
-  //Serial.print(angular_velocity[1]);
-  //Serial.print(", ");
-  //Serial.print(angular_velocity[2]);
-  //Serial.print(", ");
+  // Serial.print(angular_velocity[1]);
+  // Serial.print(", ");
+  // Serial.print(angular_velocity[2]);
+  // Serial.print(", ");
   Serial.print(attitude[0]);
   Serial.print(", ");
   Serial.print(attitude[1]);
