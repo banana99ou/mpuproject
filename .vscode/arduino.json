@@ -1,5 +1,6 @@
 {
     "configuration": "cpu=atmega2560",
     "board": "arduino:avr:mega",
-    "sketch": "mpusensorfusion\\mpusensorfusion.ino"
+    "sketch": "mpusensorfusion\\mpusensorfusion.ino",
+    "port": "COM3"
 }
