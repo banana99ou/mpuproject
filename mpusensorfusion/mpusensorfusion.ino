@@ -2,6 +2,8 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
+Adafruit_MPU6050 mpu;
+
 unsigned long now, before;
 unsigned long dt;
 float dt_seconds;
@@ -87,7 +89,6 @@ void adjust_acceleration_offset(float& offset_accel_x, float& offset_accel_y, fl
 }
 
 void setup(void) {
-  servo.attach(ServoPin);
   Serial.begin(115200);
   if (!mpu.begin()) {
     Serial.println("Failed to find MPU6050");
@@ -222,8 +223,8 @@ void loop() {
   location[1] += velocity[1] * dt_seconds;
   location[2] += velocity[2] * dt_seconds;
 
-  // Serial.print(a.acceleration.x);
-  // Serial.print(", ");
+  Serial.print(a.acceleration.x);
+  Serial.print(", ");
   // Serial.print(a.acceleration.y);
   // Serial.print(", ");
   // Serial.print(a.acceleration.z);
@@ -234,19 +235,19 @@ void loop() {
   // Serial.print(", ");
   // Serial.print(offset_accel_z);
   // Serial.print(", ");
-  // Serial.print(acceleration[0]);
-  // Serial.print(", ");
+  Serial.print(acceleration[0]);
+  Serial.print(", ");
   // Serial.print(acceleration[1]);
   // Serial.print(", ");
   // Serial.print(acceleration[2]);
   // Serial.print(", ");
-  // Serial.print(velocity[0]);
-  // Serial.print(", ");
+  Serial.print(velocity[0]);
+  Serial.print(", ");
   // Serial.print(velocity[1]);
   // Serial.print(", ");
   // Serial.print(velocity[2]);
   // Serial.print(", ");
-  // Serial.print(location[0]);
+  Serial.println(location[0]);
   // Serial.print(", ");
   // Serial.print(location[1]);
   // Serial.print(", ");
@@ -276,9 +277,9 @@ void loop() {
   // Serial.print(", ");
   // Serial.print(angular_velocity[2]);
   // Serial.print(", ");
-  Serial.print(attitude[0]);
-  Serial.print(", ");
-  Serial.print(attitude[1]);
-  Serial.print(", ");
-  Serial.println(attitude[2]);
+  // Serial.print(attitude[0]);
+  // Serial.print(", ");
+  // Serial.print(attitude[1]);
+  // Serial.print(", ");
+  // Serial.println(attitude[2]);
 }
