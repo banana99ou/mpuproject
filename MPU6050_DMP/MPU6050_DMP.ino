@@ -101,7 +101,7 @@ MPU6050 mpu;
 // from the FIFO. Note this also requires gravity vector calculations.
 // Also note that yaw/pitch/roll angles suffer from gimbal lock (for
 // more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
-//#define OUTPUT_READABLE_YAWPITCHROLL
+#define OUTPUT_READABLE_YAWPITCHROLL
 
 // uncomment "OUTPUT_READABLE_REALACCEL" if you want to see acceleration
 // components with gravity removed. This acceleration reference frame is
@@ -114,7 +114,7 @@ MPU6050 mpu;
 // components with gravity removed and adjusted for the world frame of
 // reference (yaw is relative to initial orientation, since no magnetometer
 // is present in this case). Could be quite handy in some cases.
-#define OUTPUT_READABLE_WORLDACCEL
+// #define OUTPUT_READABLE_WORLDACCEL
 
 // uncomment "OUTPUT_TEAPOT" if you want output that matches the
 // format used for the InvenSense teapot demo
@@ -205,12 +205,12 @@ void setup() {
   devStatus = mpu.dmpInitialize();
 
   // supply your own gyro offsets here, scaled for min sensitivity
-  mpu.setXGyroOffset(2059);
-  mpu.setYGyroOffset(38);
-  mpu.setZGyroOffset(15);
-  mpu.setXAccelOffset(301);
-  mpu.setYAccelOffset(-1428);
-  mpu.setZAccelOffset(2059);
+  mpu.setXGyroOffset(127);
+  mpu.setYGyroOffset(37);
+  mpu.setZGyroOffset(19);
+  mpu.setXAccelOffset(325);
+  mpu.setYAccelOffset(-1417);
+  mpu.setZAccelOffset(2031);
   // make sure it worked (returns 0 if so)
   if (devStatus == 0) {
     // Calibration Time: generate offsets and calibrate our MPU6050
@@ -345,20 +345,6 @@ void loop() {
     Serial.print(aaWorld.y);
     Serial.print("\t");
     Serial.println(aaWorld.z);
-#endif
-
-#ifdef OUTPUT_TEAPOT
-    // display quaternion values in InvenSense Teapot demo format:
-    teapotPacket[2] = fifoBuffer[0];
-    teapotPacket[3] = fifoBuffer[1];
-    teapotPacket[4] = fifoBuffer[4];
-    teapotPacket[5] = fifoBuffer[5];
-    teapotPacket[6] = fifoBuffer[8];
-    teapotPacket[7] = fifoBuffer[9];
-    teapotPacket[8] = fifoBuffer[12];
-    teapotPacket[9] = fifoBuffer[13];
-    Serial.write(teapotPacket, 14);
-    teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
 #endif
 
     // blink LED to indicate activity
