@@ -200,7 +200,10 @@ void loop() {
   mpu.getEvent(&a, &g, &temp);
 
   if(now/10 > NofInitTest*2) {
-    angular_acceleration[0] = g.gyro.x + offset_gyro_x;
+    //attitude by gravity
+    idk;
+    
+    angular_acceleration[0] = alpha * (g.gyro.x + offset_gyro_x) + (1 - alpha)(accelgyro[0]);
     angular_acceleration[1] = g.gyro.y + offset_gyro_y;
     angular_acceleration[2] = g.gyro.z + offset_gyro_z;
 
