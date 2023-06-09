@@ -203,7 +203,7 @@ void loop() {
     //attitude by gravity
     idk;
     
-    angular_acceleration[0] = alpha * (g.gyro.x + offset_gyro_x) + (1 - alpha)(accelgyro[0]);
+    angular_acceleration[0] = g.gyro.x + offset_gyro_x;
     angular_acceleration[1] = g.gyro.y + offset_gyro_y;
     angular_acceleration[2] = g.gyro.z + offset_gyro_z;
 
@@ -211,7 +211,7 @@ void loop() {
     angular_velocity[1] += angular_acceleration[1] * dt_seconds;
     angular_velocity[2] += angular_acceleration[2] * dt_seconds;
 
-    attitude[0] += angular_velocity[0] * dt_seconds;
+    attitude[0] += alpha * (angular_velocity[0] * dt_seconds) + (1 - alpha)(accelgyro);
     attitude[1] += angular_velocity[1] * dt_seconds;
     attitude[2] += angular_velocity[2] * dt_seconds;
 
