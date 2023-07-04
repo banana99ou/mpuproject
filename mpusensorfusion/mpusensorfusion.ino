@@ -1,3 +1,4 @@
+
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
@@ -7,6 +8,7 @@ Adafruit_MPU6050 mpu;
 unsigned long now, before;
 unsigned long dt;
 float dt_seconds;
+float alpha;
 
 float acceleration[3] = {0, 0, 0};
 float angular_acceleration[3] = {0, 0, 0};
@@ -16,6 +18,7 @@ float angular_velocity[3] = {0, 0, 0};
 
 float location[3] = {0, 0, 0};
 float attitude[3] = {0, 0, 0};
+float accelgyro[3] = {0, 0, 0};
 
 float raw_accel_x, raw_accel_y, raw_accel_z;
 float raw_gyro_x, raw_gyro_y, raw_gyro_z;
@@ -201,8 +204,10 @@ void loop() {
 
   if(now/10 > NofInitTest*2) {
     //attitude by gravity
-    idk;
-    
+    accelgyro[0] = atan((acceleration[1]-offset_accel_y) / sqrt(acceleration[0]*acceleration[0]+acceleration[2]*acceleration[2]));
+    accelgyro[1] = atan((acceleration[0]-offset_accel_x) / sqrt(acceleration[1]*acceleration[1]+acceleration[2]*acceleration[2]));
+    accelgyro[2] = atan(sqrt(acceleration[0]*acceleration[0]+acceleration[2]*acceleration[2]) / (acceleration[2]-offset_accel_z));
+
     angular_acceleration[0] = g.gyro.x + offset_gyro_x;
     angular_acceleration[1] = g.gyro.y + offset_gyro_y;
     angular_acceleration[2] = g.gyro.z + offset_gyro_z;
@@ -211,16 +216,12 @@ void loop() {
     angular_velocity[1] += angular_acceleration[1] * dt_seconds;
     angular_velocity[2] += angular_acceleration[2] * dt_seconds;
 
-    attitude[0] += alpha * (angular_velocity[0] * dt_seconds) + (1 - alpha)(accelgyro);
-    attitude[1] += angular_velocity[1] * dt_seconds;
-    attitude[2] += angular_velocity[2] * dt_seconds;
+    attitude[0] += alpha * (angular_velocity[0] * dt_seconds) + (1 - alpha) * (accelgyro[0]);
+    attitude[1] += alpha * (angular_velocity[1] * dt_seconds) + (1 - alpha) * (accelgyro[1]);
+    attitude[2] += alpha * (angular_velocity[2] * dt_seconds) + (1 - alpha) * (accelgyro[2]);
 
     //adjust acceleration offset
     //adjust_acceleration_offset(offset_accel_x, offset_accel_y, offset_accel_z, attitude);
-
-    acceleration[0] = a.acceleration.x + offset_accel_x;
-    acceleration[1] = a.acceleration.y + offset_accel_y;
-    acceleration[2] = a.acceleration.z + offset_accel_z;
 
     velocity[0] += acceleration[0] * dt_seconds;
     velocity[1] += acceleration[1] * dt_seconds;
