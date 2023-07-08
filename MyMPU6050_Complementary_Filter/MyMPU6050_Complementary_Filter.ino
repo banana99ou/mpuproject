@@ -88,13 +88,13 @@ void loop(){
 //  Serial.print(" | acc_yaw = "); Serial.println(acc_yaw);
 
   // Print value of Pitch, Roll & Yaw reflected Complementary Filter
-//  Serial.print(" | angle_pitch = "); Serial.print(angle_pitch);
-//  Serial.print(" | angle_roll = "); Serial.print(angle_roll);
-//  Serial.print(" | angle_yaw = "); Serial.println(angle_yaw);
+  Serial.print(" | angle_pitch = "); Serial.print(angle_pitch);
+  Serial.print(" | angle_roll = "); Serial.print(angle_roll);
+  Serial.print(" | angle_yaw = "); Serial.println(angle_yaw);
 
-  Serial.print(" | Cal_GyX = "); Serial.print(Cal_GyX);
-  Serial.print(" | acc_pitch = "); Serial.print(acc_pitch);
-  Serial.print(" | angle_pitch = "); Serial.println(angle_pitch);
+//  Serial.print(" | Cal_GyX = "); Serial.print(Cal_GyX);
+//  Serial.print(" | acc_pitch = "); Serial.print(acc_pitch);
+//  Serial.print(" | angle_pitch = "); Serial.println(angle_pitch);
 
   // Sampling Timer
   while(micros() - sampling_timer < 4000); //
