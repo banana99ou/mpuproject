@@ -37,7 +37,19 @@ VectorInt16 aaWorld;    // [x, y, z]            world-frame accel sensor measure
 VectorFloat gravity;    // [x, y, z]            gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+float rpy[3];
 
+
+// ================================================================
+// ===               Varialble for Reciever                     ===
+// ================================================================
+
+int ReceiverPin[] = {11, 12, 13, 14, 15};
+float PID[] = {1,0,0};
+float e[3];
+float Prev_e[3] = {0, 0, 0};
+float integral[3] = {0, 0, 0};
+float g[3];
 
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
@@ -172,4 +184,48 @@ void loop() {
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
     }
+
+    for(int i=0; i<3; i++){
+        rpy[i] = ypr[2-i];
+    }
+    
+    float RPY_Setpoint = ReadReceiver(ReceiverPin);
+
+    for(int i=0; i<3; i++){
+        e[i] = RPY_Setpoint[i] - rpy[i];
+    }
+    for(int i=0; i<3; i++){
+        integral[i] += e[i] * dt;
+        g[i] = P * e[i] + I*(integral[i]) + D*(e[i]-Prev_e[i])/dt;
+    }
+
+}
+
+float ReadReceiver(int ReceiverPin) {
+    //!!Each channels range should be tested
+    int ch1_raw = constrain(pulseIn(ReceiverPin[0], HIGH), 1044, 1885);
+    int ch2_raw = constrain(pulseIn(ReceiverPin[1], HIGH), 1135, 1800);
+    int ch3_raw = constrain(pulseIn(ReceiverPin[2], HIGH, 25000), 1013, 1941);
+    int ch1_raw = constrain(pulseIn(ReceiverPin[3], HIGH), 1044, 1885);
+    int ch2_raw = constrain(pulseIn(ReceiverPin[4], HIGH), 1135, 1800);
+
+    // Invert or trim each channel here
+    int ROLL  = map(ch1_raw, 1044, 1885, -254, 254);
+    int PITCH = map(ch2_raw, 1135, 1800, 254, -254);
+    int YAW   = map(ch3_raw, 1013, 1941, -254, 254);
+
+    // Setting Dead jone of joystick
+    //Serial.print(ROLL);
+    if(abs(ROLL) < 24){
+    ROLL = 0;
+    }
+    //Serial.println(ROLL);
+    if(abs(PITCH) < 24){
+    PITCH = 0;
+    }
+    if(abs(YAW) < 30){
+    YAW = 0;
+    }
+
+    return {ROLL, PITCH, YAW};
 }
