@@ -44,8 +44,15 @@ float rpy[3];
 // ===               Varialble for Reciever                     ===
 // ================================================================
 
-int ReceiverPin[] = {11, 12, 13, 14, 15};
-float PID[] = {1,0,0};
+// Pins associated with Each channel of Reciever
+int ReceiverPins[] = {11, 12, 13, 14, 15};
+
+// PID values of each channel R P Y
+float P[3] = {1,1,1};
+float I[3] = {0,0,0};
+float D[3] = {0,0,0};
+
+// PID control variables
 float e[3];
 float Prev_e[3] = {0, 0, 0};
 float integral[3] = {0, 0, 0};
@@ -189,14 +196,14 @@ void loop() {
         rpy[i] = ypr[2-i];
     }
     
-    float RPY_Setpoint = ReadReceiver(ReceiverPin);
+    float RPY_Setpoint = ReadReceiver(ReceiverPins);
 
     for(int i=0; i<3; i++){
         e[i] = RPY_Setpoint[i] - rpy[i];
     }
     for(int i=0; i<3; i++){
         integral[i] += e[i] * dt;
-        g[i] = P * e[i] + I*(integral[i]) + D*(e[i]-Prev_e[i])/dt;
+        g[i] = P[i]*e[i] + I[i]*(integral[i]) + D[i]*(e[i]-Prev_e[i])/dt;
     }
 
 }
