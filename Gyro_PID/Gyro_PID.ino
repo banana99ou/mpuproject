@@ -180,7 +180,7 @@ void loop() {
     t_n = micros();
     dt = t_n - t_b;
     t_b = t_n;
-    
+
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
     // read a packet from FIFO
@@ -207,16 +207,25 @@ void loop() {
         rpy[i] = ypr[2-i];
     }
     
+    // get setpoint from receiver
     ReadReceiver(ReceiverPins, RPY_Setpoint[0], RPY_Setpoint[1], RPY_Setpoint[2]);
 
+    // calculate Error
     for(int i=0; i<3; i++){
         e[i] = RPY_Setpoint[i] - rpy[i];
     }
+
+    // calculate PID ctl cmd
     for(int i=0; i<3; i++){
         integral[i] += e[i] * dt;
         g[i] = P[i]*e[i] + I[i]*(integral[i]) + D[i]*(e[i]-Prev_e[i])/dt;
     }
 
+    // convert PID ctl cmd to motor ctl cmd
+    for(int i=0; i<3; i++){
+        speed[] = map(constrain({-1, 1, -1, 1} * g(1) + {1, 1, -1, -1} * g(2) + {1, -1, -1, 1} * g(3), -255, 255), -255, 255);
+        analogWrite(motor[i],speed[i]);
+    }
 }
 
 void ReadReceiver(int ReceiverPin[], float& ROLL, float& PITCH, float& YAW) {
