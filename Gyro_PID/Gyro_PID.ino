@@ -200,9 +200,7 @@ void loop() {
         rpy[i] = ypr[2-i];
     }
     
-    RPY_Setpoint[0] = ReadReceiver(ReceiverPins)[0];
-    RPY_Setpoint[1] = ReadReceiver(ReceiverPins)[1];
-    RPY_Setpoint[2] = ReadReceiver(ReceiverPins)[2];
+    ReadReceiver(ReceiverPins, RPY_Setpoint[0], RPY_Setpoint[1], RPY_Setpoint[2]);
 
     for(int i=0; i<3; i++){
         e[i] = RPY_Setpoint[i] - rpy[i];
