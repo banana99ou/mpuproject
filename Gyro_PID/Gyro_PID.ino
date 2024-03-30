@@ -57,6 +57,8 @@ float D[3] = {0,0,0};
 float RPY_Setpoint[3] = {0,0,0};
 
 // PID control variables
+float dt;
+float t_n, t_b; // time now, time before
 float e[3];
 float Prev_e[3] = {0, 0, 0};
 float integral[3] = {0, 0, 0};
@@ -174,6 +176,11 @@ void setup() {
 // ================================================================
 
 void loop() {
+    // calculate dt
+    t_n = micros();
+    dt = t_n - t_b;
+    t_b = t_n;
+    
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
     // read a packet from FIFO
