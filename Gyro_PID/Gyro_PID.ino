@@ -44,6 +44,8 @@ float rpy[3];
 // ===               Varialble for Reciever                     ===
 // ================================================================
 
+int i = 0;
+
 // Pins associated with Each channel of Reciever
 int ReceiverPins[] = {11, 12, 13, 14, 15};
 
@@ -51,6 +53,8 @@ int ReceiverPins[] = {11, 12, 13, 14, 15};
 float P[3] = {1,1,1};
 float I[3] = {0,0,0};
 float D[3] = {0,0,0};
+
+float RPY_Setpoint[3] = {0,0,0};
 
 // PID control variables
 float e[3];
@@ -196,7 +200,9 @@ void loop() {
         rpy[i] = ypr[2-i];
     }
     
-    float RPY_Setpoint = ReadReceiver(ReceiverPins);
+    RPY_Setpoint[0] = ReadReceiver(ReceiverPins)[0];
+    RPY_Setpoint[1] = ReadReceiver(ReceiverPins)[1];
+    RPY_Setpoint[2] = ReadReceiver(ReceiverPins)[2];
 
     for(int i=0; i<3; i++){
         e[i] = RPY_Setpoint[i] - rpy[i];
@@ -208,31 +214,37 @@ void loop() {
 
 }
 
-float ReadReceiver(int ReceiverPin) {
+void ReadReceiver(int ReceiverPin[], float& ROLL, float& PITCH, float& YAW) {
+    /*
+    reads setpoint from receiver via pulseIn()
+    and returns data by reference
+    */
     //!!Each channels range should be tested
     int ch1_raw = constrain(pulseIn(ReceiverPin[0], HIGH), 1044, 1885);
     int ch2_raw = constrain(pulseIn(ReceiverPin[1], HIGH), 1135, 1800);
     int ch3_raw = constrain(pulseIn(ReceiverPin[2], HIGH, 25000), 1013, 1941);
-    int ch1_raw = constrain(pulseIn(ReceiverPin[3], HIGH), 1044, 1885);
-    int ch2_raw = constrain(pulseIn(ReceiverPin[4], HIGH), 1135, 1800);
+    int ch4_raw = constrain(pulseIn(ReceiverPin[3], HIGH), 1044, 1885);
+    int ch5_raw = constrain(pulseIn(ReceiverPin[4], HIGH), 1135, 1800);
 
     // Invert or trim each channel here
-    int ROLL  = map(ch1_raw, 1044, 1885, -254, 254);
-    int PITCH = map(ch2_raw, 1135, 1800, 254, -254);
-    int YAW   = map(ch3_raw, 1013, 1941, -254, 254);
+    float roll  = map(ch1_raw, 1044, 1885, -254, 254);
+    float pitch = map(ch2_raw, 1135, 1800, 254, -254);
+    float yaw   = map(ch3_raw, 1013, 1941, -254, 254);
 
     // Setting Dead jone of joystick
     //Serial.print(ROLL);
-    if(abs(ROLL) < 24){
-    ROLL = 0;
+    if(abs(roll) < 24){
+    roll = 0;
     }
     //Serial.println(ROLL);
-    if(abs(PITCH) < 24){
-    PITCH = 0;
+    if(abs(pitch) < 24){
+    pitch = 0;
     }
-    if(abs(YAW) < 30){
-    YAW = 0;
+    if(abs(yaw) < 30){
+    yaw = 0;
     }
 
-    return {ROLL, PITCH, YAW};
+    ROLL  = roll;
+    PITCH = pitch;
+    YAW   = yaw;
 }
