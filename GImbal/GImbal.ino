@@ -1,5 +1,6 @@
 #include "I2Cdev.h"
-#include "MPU6050_6Axis_MotionApps20.h"
+
+#include "MPU6050_6Axis_MotionApps612.h"
 //#include "MPU6050.h" // not necessary if using MotionApps include file
 
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
@@ -102,11 +103,12 @@ void setup() {
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(220);
-    mpu.setYGyroOffset(76);
-    mpu.setZGyroOffset(-85);
-    mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
-
+    mpu.setXGyroOffset(51);
+    mpu.setYGyroOffset(8);
+    mpu.setZGyroOffset(21);
+    mpu.setXAccelOffset(1150);
+    mpu.setYAccelOffset(-50);
+    mpu.setZAccelOffset(1060);
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
         // Calibration Time: generate offsets and calibrate our MPU6050
@@ -161,15 +163,16 @@ void loop() {
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
             Serial.print("ypr\t");
-            Serial.print(ypr[0] * 180/M_PI);
+            Serial.print(ypr[0] * 180 / M_PI);
             Serial.print("\t");
-            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print(ypr[1] * 180 / M_PI);
             Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
+            Serial.print(ypr[2] * 180 / M_PI);
 
             myservo1.write(ypr[1] * 180/M_PI+90);
             myservo2.write(ypr[0] * 180/M_PI+90);
             myservo3.write(ypr[2] * 180/M_PI+90);
+            Serial.println();
         #endif
 
         // blink LED to indicate activity
